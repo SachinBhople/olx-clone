@@ -41,14 +41,23 @@ exports.verifyMobilOTP = asyncHandler(async (req, res) => {
     if (otp !== result.mobailcode) {
         return res.status(400).json({ message: "INvalid OTP" })
     }
-    await User.findByIdAndUpdate(req.loggedInUser, { emailverified: true })
-    res.json({ message: "Email Verify Success" })
+    const updatetedUser = await User.findByIdAndUpdate(req.loggedInUser, { emailverified: true }, { new: true })
+    res.json({
+        message: "Email Verify Success", result: {
+            _id: updatetedUser._id,
+            name: updatetedUser.name,
+            email: updatetedUser.email,
+            mobail: updatetedUser.mobail,
+            avatar: updatetedUser.avatar,
+            emailverified: updatetedUser.emailverified,
+            mobailverified: updatetedUser.mobailverified,
+        }
+    })
 })
 
 exports.VerifyUserMobile = asyncHandler(async (req, res) => {
     const result = await User.findById(req.loggedInUser)
     const otp = Math.floor(10000 + Math.random() * 900000)
-    await User.findByIdAndUpdate(req.loggedInUser, { mobailcode: otp })
     await sendSMS({ message: `Welcome to Skillhub.Your Otp is ${otp}`, numbers: `${result.mobail}` })
     res.json({ message: "verification send success" })
 })
